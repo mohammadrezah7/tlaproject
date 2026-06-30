@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
+
 import logging
+from itertools import islice
+from tabnanny import check
 
 class TuringMachine:
-    """
-    A robust Turing Machine simulator with a bidirectional infinite tape.
-    """
 
     def __init__(self, transitions, start_state='q0', accept_state='qa', reject_state='qr', blank_symbol=''):
         self.transitions = transitions
@@ -14,12 +13,11 @@ class TuringMachine:
         self.blank_symbol = blank_symbol
 
     def run(self, input_):
-        """
-        Executes the Turing machine as a Python Generator.
-        Yields (action, configuration) at each step.
-        """
-        # Initialize tape as a list.
-        tape = list(input_) if input_ else [self.blank_symbol]
+        
+        if input_ :
+            tape = list (input_)
+        else:
+            tape = [self.blank_symbol]
         if not tape:
             tape = [self.blank_symbol]
             
@@ -27,18 +25,22 @@ class TuringMachine:
         state = self.start_state
 
         while True:
-            # 1. Handle Infinite Tape (Dynamic Expansion)
             if pos < 0:
                 tape.insert(0, self.blank_symbol)
                 pos = 0
             elif pos >= len(tape):
                 tape.append(self.blank_symbol)
 
-            # 2. Prepare Configuration
-            # LHS: symbols on left in REVERSE order (closest to head is last)
-            left_hand_side = tape[:pos][::-1] 
-            current_symbol = tape[pos]
-            right_hand_side = tape[pos + 1:]
+
+            left_hand_side = []
+            right_hand_side =[]
+            for i in range(len(tape)):
+                if i<pos:
+                    left_hand_side.append(tape[i])
+                elif i==pos:
+                    current_symbol = tape[pos]
+                else:
+                    right_hand_side.append(tape[i])
 
             config = {
                 'state': state,
@@ -47,39 +49,36 @@ class TuringMachine:
                 'right_hand_side': right_hand_side
             }
 
-            # 3. Check Halt Conditions
             if state == self.accept_state:
                 yield ('Accept', config)
                 break
+
             if state == self.reject_state:
                 yield ('Reject', config)
                 break
-
-            # 4. Fetch Transition
-            lookup = (state, current_symbol)
-            if lookup not in self.transitions:
+            
+            check = (state, current_symbol)
+            if check not in self.transitions:
                 yield ('Reject', config)
                 break
 
-            # Yield current state before executing the transition
             yield (None, config)
 
-            # 5. Execute Transition
-            new_state, write_symbol, direction = self.transitions[lookup]
+            new_state, write_symbol, direction = self.transitions[check]
             
             tape[pos] = write_symbol
             state = new_state
 
-            # 6. Move Head
-            if direction.upper() == 'L':
+            if direction == 'L':
                 pos -= 1
-            elif direction.upper() == 'R':
+            elif direction == 'R':
                 pos += 1
+            elif direction == 'S':
+                pos = pos
             else:
                 raise ValueError(f"Invalid direction: {direction}")
 
-    def accepts(self, input_, step_limit=10000):
-        """Returns True if accepted, False if rejected, None if limit reached."""
+    def accepts(self, input_, step_limit=100):
         gen = self.run(input_)
         steps = 0
         for action, _ in gen:
@@ -93,27 +92,61 @@ class TuringMachine:
         return False
 
     def rejects(self, input_, **kwargs):
-        """Exact opposite of accepts."""
         res = self.accepts(input_, **kwargs)
         if res is None: return None
         return not res
 
     def debug(self, input_, step_limit=100, colored=False):
-        """Prints state_name left[symbol]right."""
         gen = self.run(input_)
         for i, (action, config) in enumerate(gen):
             if i >= step_limit:
-                print("... step limit reached ...")
+                print("step limit reached")
                 break
             
-            # For display purposes in debug, we show the tape in natural order
-            # but the logic uses reversed LHS as per spec.
-            lhs = "".join(config['left_hand_side'][::-1])
-            sym = config['symbol']
-            rhs = "".join(config['right_hand_side'])
-            state = config['state']
-            
-            output = f"{state:10} {lhs}[{sym}]{rhs}"
+            left =""
+            right=""
+            for i in range (len(config["left_hand_side"])):
+                left += config["left_hand_side"][i]
+            for i in range (len(config["right_hand_side"])):
+                right += config["right_hand_side"][i]
+            sym = config["symbol"]
+            output = f" {left}[{sym}]{right}"
             if action:
                 output += f" -> {action}"
             print(output)
+
+new1 = TuringMachine(transitions = {
+        ('q0', '#'): ('End', '#', 'R'),
+        ('End', ''): ('qa', '', 'R'),
+
+        ('q0', '0'): ('FindDelimiter0', 'X', 'R'),
+        ('FindDelimiter0', '#'): ('Check0', '#', 'R'),
+        ('Check0', '0'): ('FindLeftmost', 'X', 'L'),
+
+        ('q0', '1'): ('FindDelimiter1', 'X', 'R'),
+        ('FindDelimiter1', '#'): ('Check1', '#', 'R'),
+        ('Check1', '1'): ('FindLeftmost', 'X', 'L'),
+
+        ('FindLeftmost', '0'): ('FindLeftmost', '0', 'L'),
+        ('FindLeftmost', '1'): ('FindLeftmost', '1', 'L'),
+        ('FindLeftmost', 'X'): ('FindLeftmost', 'X', 'L'),
+        ('FindLeftmost', '#'): ('FindLeftmost', '#', 'L'),
+        ('FindLeftmost', ''): ('FindNext', '', 'R'),
+
+        ('FindNext', 'X'): ('FindNext', 'X', 'R'),
+        ('FindNext', '0'): ('FindDelimiter0', 'X', 'R'),
+        ('FindNext', '1'): ('FindDelimiter1', 'X', 'R'),
+        ('FindNext', '#'): ('End', '#', 'R'),
+
+        ('FindDelimiter0', '0'): ('FindDelimiter0', '0', 'R'),
+        ('FindDelimiter0', '1'): ('FindDelimiter0', '1', 'R'),
+        ('FindDelimiter1', '0'): ('FindDelimiter1', '0', 'R'),
+        ('FindDelimiter1', '1'): ('FindDelimiter1', '1', 'R'),
+
+        ('Check0', 'X'): ('Check0', 'X', 'R'),
+        ('Check1', 'X'): ('Check1', 'X', 'R'),
+
+        ('End', 'X'): ('End', 'X', 'R')
+})
+
+new1.accepts("11#XXXX1")
