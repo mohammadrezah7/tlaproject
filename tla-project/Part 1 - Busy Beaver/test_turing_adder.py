@@ -7,9 +7,9 @@ transitions = {
         ('q0', '0'): ('find_end', '1', 'R'),
     
         ('find_end', '1'): ('find_end', '1', 'R'),
-        ('find_end', ''): ('remove_extra', '', 'L'),
+        ('find_end', ''): ('remove', '', 'L'),
     
-        ('remove_extra', '1'): ('qa', '', 'R'),
+        ('remove', '1'): ('qa', '', 'R'),
 }
 
 if __name__ == "__main__":
