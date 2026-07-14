@@ -33,39 +33,57 @@ from turing_machine import TuringMachine
 #         but the acceptance checks are limited by the number of steps they are allowed to perform.
 
 #create the Turing machine
-bbeaver2 = TuringMachine(
+bb2 = TuringMachine(
     { 
         ('a', '0'): ('b', '1', 'R'), ('a', '1'): ('b', '1', 'L'),
         ('b', '0'): ('a', '1', 'L'), ('b', '1'): ('h', '1', 'R'),
     },
     start_state='a', accept_state='h', reject_state='r', blank_symbol='0'
 )
-bbeaver3 = TuringMachine(
+bb3 = TuringMachine(
     {
         ('a', '0'): ('b', '1', 'R'), ('a', '1'): ('h', '1', 'L'),
         ('b', '0'): ('c', '0', 'R'), ('b', '1'): ('b', '1', 'R'),
         ('c', '0'): ('c', '1', 'L'), ('c', '1'): ('a', '1', 'L'),
     },
-    start_state='a', accept_state='h', reject_state='r', blank_symbol='0'
+    start_state='a',
+    accept_state='h',
+    reject_state='r',
+    blank_symbol='0'
 )
-bbeaver4 = TuringMachine(
+bb4 = TuringMachine(
     {
-        ('a', '0'): ('b', '1', 'R'), ('a', '1'): ('b', '1', 'L'),
-        ('b', '0'): ('a', '1', 'L'), ('b', '1'): ('c', '0', 'L'),
-        ('c', '0'): ('h', '1', 'R'), ('c', '1'): ('d', '1', 'L'),
-        ('d', '0'): ('d', '1', 'R'), ('d', '1'): ('a', '0', 'R'),
+        ('a', '0'): ('b', '1', 'R'),
+        ('a', '1'): ('a', '0', 'L'),
+        ('b', '0'): ('c', '1', 'R'),
+        ('b', '1'): ('b', '1', 'L'),
+        ('c', '0'): ('b', '1', 'L'),
+        ('c', '1'): ('d', '1', 'R'),
+        ('d', '0'): ('h', '1', 'R'),
+        ('d', '1'): ('a', '0', 'R'),
     },
-    start_state='a', accept_state='h', reject_state='r', blank_symbol='0'
+    start_state='a',
+    accept_state='h',
+    reject_state='r',
+    blank_symbol='0'
 )
-bbeaver5 = TuringMachine(
+bb5 = TuringMachine(
     {
-        ('a', '0'): ('b', '1', 'R'), ('a', '1'): ('c', '1', 'L'),
-        ('b', '0'): ('c', '1', 'R'), ('b', '1'): ('b', '1', 'R'),
-        ('c', '0'): ('d', '1', 'R'), ('c', '1'): ('e', '0', 'L'),
-        ('d', '0'): ('a', '1', 'L'), ('d', '1'): ('d', '1', 'L'),
-        ('e', '0'): ('h', '1', 'R'), ('e', '1'): ('a', '0', 'L'),
+        ('a', '0'): ('b', '1', 'R'),
+        ('a', '1'): ('a', '1', 'L'),
+        ('b', '0'): ('c', '1', 'R'),
+        ('b', '1'): ('e', '1', 'L'),
+        ('c', '0'): ('d', '1', 'R'),
+        ('c', '1'): ('e', '1', 'R'),
+        ('d', '0'): ('a', '0', 'L'),
+        ('d', '1'): ('c', '1', 'R'),
+        ('e', '0'): ('h', '1', 'R'),
+        ('e', '1'): ('b', '0', 'L'),
     },
-    start_state='a', accept_state='h', reject_state='r', blank_symbol='0'
+    start_state='a',
+    accept_state='h',
+    reject_state='r',
+    blank_symbol='0'
 )
 
 if __name__ == "__main__":
@@ -73,8 +91,8 @@ if __name__ == "__main__":
         w = input_
         # the same as mine 4 ones
         # This is an optimal BB-2. 4 is the maximum number of 1s you can get for 2 states
-        print("BB with 2 states")
-        bbeaver3.debug(w, step_limit=1000)
+        print("BB with 4 states")
+        bb4.debug(w, step_limit=1000)
         print()
         # 6
         # The busy beaver function is defined so that
